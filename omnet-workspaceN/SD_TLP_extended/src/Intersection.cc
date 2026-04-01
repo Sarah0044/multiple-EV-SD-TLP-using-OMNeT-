@@ -900,7 +900,7 @@ void Intersection::initialize()
     awtA_arrivalsRescueSum = 0;
 
     //for fixed window metrics --> use option B
-    fixedWindow = par("fixedWindow").doubleValue();   // e.g. 20 s
+    fixedWindow = par("fixedWindow").doubleValue();   // 300s
     // Option B init
     metricsBActive = false;
     metricsBEnd = SIMTIME_ZERO;

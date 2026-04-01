@@ -737,12 +737,21 @@ void Controller::initialize()
 
         if (ev.DEMV > DD_m) continue; //not within preemption distance
 
+
+
         if (bestId == -1) {//if no best, then its the best
             bestId = ev.evId;
             continue;
         }
 
         const EVState& best = evs.at(bestId);
+
+
+        EV_INFO << "[ARBITRATION] compare EV " << ev.evId
+                << " vs EV " << best.evId
+                << " | EAT: " << ev.eat() << " vs " << best.eat()
+                << " | dist: " << ev.distToAP << " vs " << best.distToAP
+                << "\n";
        //if best exists --> it will compare
         // 1) severity (priority)
         if (ev.severity < best.severity) {
@@ -756,14 +765,20 @@ void Controller::initialize()
         double bestEAT = best.eat();
 
         if (evEAT < bestEAT) {
+            EV_INFO << "[ARBITRATION] EV " << ev.evId
+                       << " wins (EAT)\n";
             bestId = ev.evId;
+
             continue;
         }
         if (evEAT > bestEAT) continue;
 
         // 3) equal EAT -> closer to accident position (smaller distToAP)
         if (ev.distToAP < best.distToAP) {
+            EV_INFO << "[ARBITRATION] EV " << ev.evId
+                       << " wins (distToAP)\n";
             bestId = ev.evId;
+
             continue;
         }
         if (ev.distToAP > best.distToAP) continue;
@@ -773,6 +788,8 @@ void Controller::initialize()
         simtime_t bestReq = (best.tSent >= SIMTIME_ZERO) ? best.tSent : best.lastSeen;
 
         if (evReq < bestReq) {
+            EV_INFO << "[ARBITRATION] EV " << ev.evId
+                                   << " wins (fcfs)\n";
             bestId = ev.evId;
             continue;
         }
@@ -809,7 +826,16 @@ void Controller::initialize()
     session.inClear = false;
     session.pendingEvId = -1;
 
-    sendCmd(session.intersectionId, session.approach, "PREEMPT", 0.0);
+
+
+
+    std::pair<int,int> key = {ev.evId, ev.targetInter};
+
+        // Count only if this EV-intersection service is not already active/counting
+        if (activePreemptPairs.insert(key).second) {
+            countPreempt++;
+        }
+     sendCmd(session.intersectionId, session.approach, "PREEMPT", 0.0);
 }
 
  // switchSessionWithClear(): HARD override with safety buffer
@@ -837,6 +863,12 @@ void Controller::endSessionToNormal()
 {
     if (!session.active) return;
 
+    std::pair<int,int> key = {session.evId, session.intersectionId};
+
+        // Count recovery only once for the currently active EV-intersection service
+        if (activeRecoveryPairs.insert(key).second) {
+            countRecovery++;
+        }
     double recoveryDuration = par("recoveryDuration").doubleValue();  //5 seconds
     double roadSegLen = par("roadSegmentLength").doubleValue();
 
@@ -924,7 +956,12 @@ void Controller::applyFcfs()
                     if (!haveFreshQueues(nextInter)) continue;
 
                     if (q[nextInter][owner.approach].TD > TDthreshold) {
-                        sendCmd(nextInter, owner.approach, "PREEMPT", 0.0);
+
+                        std::pair<int,int> key = {nextInter, owner.approach};
+                        if (countedLookaheadPairs.insert(key).second) {
+                            countLookaheadPreempt++;
+                        }
+                         sendCmd(nextInter, owner.approach, "PREEMPT", 0.0);
                     }
                 }
                 return;
@@ -953,6 +990,10 @@ void Controller::applyFcfs()
                     if (!haveFreshQueues(nextInter)) continue;
 
                     if (q[nextInter][owner.approach].TD > TDthreshold) {
+                        std::pair<int,int> key = {nextInter, owner.approach};
+                                               if (countedLookaheadPairs.insert(key).second) {
+                                                   countLookaheadPreempt++;
+                                               }
                         sendCmd(nextInter, owner.approach, "PREEMPT", 0.0);
                     }
                 }
@@ -1003,12 +1044,16 @@ void Controller::applyFcfs()
         if (!haveFreshQueues(nextInter)) continue;
 
         if (q[nextInter][newOwner.approach].TD > TDthreshold) {
+            std::pair<int,int> key = {nextInter, newOwner.approach};
+                                   if (countedLookaheadPairs.insert(key).second) {
+                                       countLookaheadPreempt++;
+                                   }
             sendCmd(nextInter, newOwner.approach, "PREEMPT", 0.0);
         }
     }
 }
  // applySdtlpSingle(): original SD-TLP single-EV behavior
-  void Controller::applySdtlpSingle()
+ void Controller::applySdtlpSingle()
 {
     int candidate = -1;
 
@@ -1052,11 +1097,106 @@ void Controller::applyFcfs()
         if (!haveFreshQueues(nextInter)) continue;
 
         if (q[nextInter][ev.approach].TD > TDthreshold) {
+            std::pair<int,int> key = {nextInter, ev.approach};
+                                   if (countedLookaheadPairs.insert(key).second) {
+                                       countLookaheadPreempt++;
+                                   }
             sendCmd(nextInter, ev.approach, "PREEMPT", 0.0);
         }
     }
 }
 
+/*
+// applySdtlpSingle(): original SD-TLP single-EV behavior (Pick the first eligible EV once, then never consider any other EV again.)
+void Controller::applySdtlpSingle()
+{
+    // If no EV has been locked yet, choose exactly one EV forever (based on order in the list)
+    if (singleLockedEvId == -1) {
+        for (const auto& kv : evs) {
+            const EVState& ev = kv.second;
+
+            if (!fresh(ev.lastSeen, 1.0)) continue;
+            if (ev.targetInter < 0 || ev.targetInter >= numIntersections) continue;
+            if (ev.approach < 0 || ev.approach >= numApproaches) continue;
+            if (!haveFreshQueues(ev.targetInter)) continue;
+
+            double ET_sec = computeDD_dynamic(ev.targetInter, ev.approach);
+            double DD_m = ET_sec * std::max(0.1, std::fabs(ev.speed));
+
+            // Only eligible if EV is within preemption distance
+            if (ev.DEMV > DD_m) continue;
+
+            singleLockedEvId = ev.evId;   // lock this EV for the whole simulation
+            break;
+        }
+    }
+
+    // If still no EV has ever become eligible, do nothing
+    if (singleLockedEvId == -1) {
+        if (session.active) endSessionToNormal();
+        return;
+    }
+
+    // Ignore all other EVs forever
+    auto it = evs.find(singleLockedEvId);
+    if (it == evs.end()) {
+        if (session.active) endSessionToNormal();
+        return;
+    }
+
+    const EVState& ev = it->second;
+
+    if (!fresh(ev.lastSeen, 1.0)) {
+        if (session.active) endSessionToNormal();
+        return;
+    }
+
+    if (ev.targetInter < 0 || ev.targetInter >= numIntersections) {
+        if (session.active) endSessionToNormal();
+        return;
+    }
+
+    if (ev.approach < 0 || ev.approach >= numApproaches) {
+        if (session.active) endSessionToNormal();
+        return;
+    }
+
+    if (!haveFreshQueues(ev.targetInter)) {
+        if (session.active) endSessionToNormal();
+        return;
+    }
+
+    double ET_sec = computeDD_dynamic(ev.targetInter, ev.approach);
+    double DD_m = ET_sec * std::max(0.1, std::fabs(ev.speed));
+
+    // If locked EV is not eligible right now, do NOT switch to another EV
+    if (ev.DEMV > DD_m) {
+        if (session.active) endSessionToNormal();
+        return;
+    }
+
+    if (!session.active) {
+        startSession(ev);
+    } else {
+        // same EV progresses to next intersection
+        if (session.evId == ev.evId && session.intersectionId != ev.targetInter) {
+            endSessionToNormal();
+            startSession(ev);
+        }
+    }
+
+    // Part 2 lookahead: next two intersections if congested on EV approach
+    for (int k = 1; k <= 2; k++) {
+        int nextInter = ev.targetInter + k;
+        if (nextInter >= numIntersections) continue;
+        if (!haveFreshQueues(nextInter)) continue;
+
+        if (q[nextInter][ev.approach].TD > TDthreshold) {
+            sendCmd(nextInter, ev.approach, "PREEMPT", 0.0);
+        }
+    }
+}
+*/
  // applySdtlpMulti(): extended SD-TLP
 //  winner = severity, then EAT, then distToAP, then FCFS
 // HARD override: if a different EV becomes winner (and is inside DD), switch immediately
@@ -1089,10 +1229,16 @@ void Controller::applyFcfs()
         // If a different EV is now the winner, HARD override:
         if (session.evId != winner.evId) {
 
+            std::pair<int,int> oldKey = {session.evId, session.intersectionId};
+                activePreemptPairs.erase(oldKey);
+                activeRecoveryPairs.erase(oldKey);
+
             // Cancel previous EV's lookahead reservations (so it cannot keep next TLs)
             for (int k = 1; k <= 2; k++) {
                 int nextInter = session.intersectionId + k;
                 if (nextInter >= numIntersections) continue;
+                std::pair<int,int> key = {nextInter, session.approach};
+                    countedLookaheadPairs.erase(key);
                 sendCmd(nextInter, -1, "NORMAL", 0.0);
             }
 
@@ -1114,6 +1260,10 @@ void Controller::applyFcfs()
         if (!haveFreshQueues(nextInter)) continue;
 
         if (q[nextInter][winner.approach].TD > TDthreshold) {
+            std::pair<int,int> key = {nextInter, winner.approach};
+            if (countedLookaheadPairs.insert(key).second) {
+                countLookaheadPreempt++;
+            }
             sendCmd(nextInter, winner.approach, "PREEMPT", 0.0);
         }
     }
@@ -1197,6 +1347,12 @@ void Controller::applyFcfs()
 
 void Controller::finish()
 {
+    int totalOverhead = countPreempt + countLookaheadPreempt + countRecovery;
+
+        recordScalar("countPreempt", countPreempt);
+        recordScalar("countLookaheadPreempt", countLookaheadPreempt);
+        recordScalar("countRecovery", countRecovery);
+        recordScalar("totalControlOverhead", totalOverhead);
     cancelAndDelete(tick);
 }
 

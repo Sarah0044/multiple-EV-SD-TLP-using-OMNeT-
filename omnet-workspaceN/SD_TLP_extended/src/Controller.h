@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
+#include <utility>
  namespace omnetpp{
 
 // Controller receives:
@@ -20,12 +22,18 @@ class Controller : public cSimpleModule
     int numIntersections = 4;
     int numApproaches = 4;
     int fcfsOwner = -1;
-
-    std::string method;          // "NO_PREEMPT", "FCFS", "SDTLP", "SDTLP_MULTI"
+     std::string method;          // "NO_PREEMPT", "FCFS", "SDTLP", "SDTLP_MULTI"
     double TDthreshold = 0.7;    // fixed paper parameter
     double Dthreshold = 150.0;   // meters (min distance between two traffic lights to see if both should be red or only current)
     simtime_t tClear = 3.0;      // all-red clearance time when switching traffic lights (safety buffer)
+    int countLookaheadPreempt = 0;  // future preempt
 
+    // for future lookahead counting
+    std::set<std::pair<int,int>> countedLookaheadPairs;
+    int countPreempt = 0;//total counted preemption for overhead
+    int countRecovery = 0;//total counted recovery for overhead
+    std::set<std::pair<int,int>> activePreemptPairs;
+    std::set<std::pair<int,int>> activeRecoveryPairs;
     // the latest queue state for one [intersection][approach]
     struct QueueState {
         int C = 0;       // queue length
@@ -33,7 +41,7 @@ class Controller : public cSimpleModule
         simtime_t lastUpdate = -1;//time we last received a report for this approach
     };
     std::vector<std::vector<QueueState>> q; // size: numIntersections x numApproaches
-
+    int singleLockedEvId = -1;
     // EV state tracked at controller
     struct EVState {
         int evId = -1;                 //id of ev
