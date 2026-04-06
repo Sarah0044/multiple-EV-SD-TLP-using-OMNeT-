@@ -19,4 +19,4 @@ The proposed extension uses a **centralized controller** that resolves conflicts
   - Medium
   - High
 
-## Project Structure
+
