@@ -1,37 +1,37 @@
 version 3
-run Scenario2_TwoEV_DiffSeverity_LowerFirst-1-20260407-02:10:48-76040
-attr configname Scenario2_TwoEV_DiffSeverity_LowerFirst
-attr datetime 20260407-02:10:48
-attr datetimef 20260407-021048
-attr experiment Scenario2_TwoEV_DiffSeverity_LowerFirst
+run Scenario3_TwoEV_SameSeverity-4-20260407-02:12:40-76373
+attr configname Scenario3_TwoEV_SameSeverity
+attr datetime 20260407-02:12:40
+attr datetimef 20260407-021240
+attr experiment Scenario3_TwoEV_SameSeverity
 attr inifile omnetpp.ini
-attr iterationvars $0=43
-attr iterationvarsd 43
-attr iterationvarsf 43-
-attr measurement $0=43
+attr iterationvars $0=46
+attr iterationvarsd 46
+attr iterationvarsf 46-
+attr measurement $0=46
 attr network ned.CityNetwork
-attr processid 76040
+attr processid 76373
 attr repetition 0
 attr replication #0
 attr resultdir results
-attr runnumber 1
-attr seedset 43
-config seed-set 43
+attr runnumber 4
+attr seedset 46
+config seed-set 46
 config **.numEVs 2
 config *.ev[0].evId 0
-config *.ev[0].severity 1
+config *.ev[0].severity 2
 config *.ev[0].startPos -300m
 config *.ev[0].destinationPos 300m
 config *.ev[0].speed 16.67mps
 config *.ev[0].approach 3
 config *.ev[0].startTime 300s
 config *.ev[1].evId 1
-config *.ev[1].severity 3
-config *.ev[1].startPos 299m
+config *.ev[1].severity 2
+config *.ev[1].startPos 200m
 config *.ev[1].destinationPos -300m
 config *.ev[1].speed -16.67mps
 config *.ev[1].approach 1
-config *.ev[1].startTime 300s
+config *.ev[1].startTime 306s
 config network ned.CityNetwork
 config sim-time-limit 1800s
 config ned-path ned
@@ -46,10 +46,10 @@ config *.inter[*].arrivalMean 10s
 config *.inter[*].normalSpeed 9.72
 config *.inter[*].queueMax 50
 
-scalar CityNetwork.ev[0] ART_seconds 45
-scalar CityNetwork.ev[0] EV_stopped_seconds 8
-scalar CityNetwork.ev[1] ART_seconds 54
-scalar CityNetwork.ev[1] EV_stopped_seconds 18
+scalar CityNetwork.ev[0] ART_seconds 43
+scalar CityNetwork.ev[0] EV_stopped_seconds 6
+scalar CityNetwork.ev[1] ART_seconds 40
+scalar CityNetwork.ev[1] EV_stopped_seconds 10
 par CityNetwork.controller typename "\"ned.Controller\""
 par CityNetwork.controller numIntersections 4
 par CityNetwork.controller numApproaches 4
@@ -73,10 +73,10 @@ par CityNetwork.controller method "\"SDTLP_MULTI\""
 par CityNetwork.controller TDthreshold 0.7
 par CityNetwork.controller Dthreshold 150m
 attr unit m
-scalar CityNetwork.controller countPreempt 3
+scalar CityNetwork.controller countPreempt 5
 scalar CityNetwork.controller countLookaheadPreempt 0
 scalar CityNetwork.controller countRecovery 1
-scalar CityNetwork.controller totalControlOverhead 4
+scalar CityNetwork.controller totalControlOverhead 6
 par CityNetwork.inter[0] typename "\"ned.Intersection\""
 par CityNetwork.inter[0] warmupTime 300s
 attr unit s
@@ -103,30 +103,30 @@ par CityNetwork.inter[0] normalSpeed 9.72mps
 attr unit mps
 par CityNetwork.inter[0] stabilityExtra 5s
 attr unit s
-scalar CityNetwork.inter[0] AIWT_seconds 47.833333333333
-scalar CityNetwork.inter[0] AWT_seconds 8.8
-scalar CityNetwork.inter[0] AIWT_A_seconds 15.944444444444
-scalar CityNetwork.inter[0] AWT_A_seconds 9.7777777777778
-scalar CityNetwork.inter[0] AIWT_num_waitingImposedSec 287
-scalar CityNetwork.inter[0] AIWT_den_totalArrivalsCross 6
-scalar CityNetwork.inter[0] AWT_num_waitingRescueRouteSec 88
-scalar CityNetwork.inter[0] AWT_den_servedRescueVeh 10
-scalar CityNetwork.inter[0] AIWT_A_den_initialCrossSum 12
-scalar CityNetwork.inter[0] AIWT_A_den_arrivalsCrossSum 6
-scalar CityNetwork.inter[0] AIWT_A_den_total 18
-scalar CityNetwork.inter[0] AWT_A_den_initialRescueSum 5
-scalar CityNetwork.inter[0] AWT_A_den_arrivalsRescueSum 4
+scalar CityNetwork.inter[0] AIWT_seconds 84.666666666667
+scalar CityNetwork.inter[0] AWT_seconds 6
+scalar CityNetwork.inter[0] AIWT_A_seconds 15.875
+scalar CityNetwork.inter[0] AWT_A_seconds 6
+scalar CityNetwork.inter[0] AIWT_num_waitingImposedSec 254
+scalar CityNetwork.inter[0] AIWT_den_totalArrivalsCross 3
+scalar CityNetwork.inter[0] AWT_num_waitingRescueRouteSec 54
+scalar CityNetwork.inter[0] AWT_den_servedRescueVeh 9
+scalar CityNetwork.inter[0] AIWT_A_den_initialCrossSum 13
+scalar CityNetwork.inter[0] AIWT_A_den_arrivalsCrossSum 3
+scalar CityNetwork.inter[0] AIWT_A_den_total 16
+scalar CityNetwork.inter[0] AWT_A_den_initialRescueSum 4
+scalar CityNetwork.inter[0] AWT_A_den_arrivalsRescueSum 5
 scalar CityNetwork.inter[0] AWT_A_den_total 9
-scalar CityNetwork.inter[0] AIWT_B_seconds 44.289473684211
-scalar CityNetwork.inter[0] AWT_B_seconds 36.171428571429
-scalar CityNetwork.inter[0] AIWT_B_num_waitingImposedSec 3366
-scalar CityNetwork.inter[0] AWT_B_num_waitingRescueRouteSec 2532
-scalar CityNetwork.inter[0] AIWT_B_den_initialCrossSum 12
-scalar CityNetwork.inter[0] AIWT_B_den_arrivalsCrossSum 64
-scalar CityNetwork.inter[0] AIWT_B_den_total 76
-scalar CityNetwork.inter[0] AWT_B_den_initialRescueSum 8
-scalar CityNetwork.inter[0] AWT_B_den_arrivalsRescueSum 62
-scalar CityNetwork.inter[0] AWT_B_den_total 70
+scalar CityNetwork.inter[0] AIWT_B_seconds 52.455882352941
+scalar CityNetwork.inter[0] AWT_B_seconds 37.947368421053
+scalar CityNetwork.inter[0] AIWT_B_num_waitingImposedSec 3567
+scalar CityNetwork.inter[0] AWT_B_num_waitingRescueRouteSec 2163
+scalar CityNetwork.inter[0] AIWT_B_den_initialCrossSum 13
+scalar CityNetwork.inter[0] AIWT_B_den_arrivalsCrossSum 55
+scalar CityNetwork.inter[0] AIWT_B_den_total 68
+scalar CityNetwork.inter[0] AWT_B_den_initialRescueSum 4
+scalar CityNetwork.inter[0] AWT_B_den_arrivalsRescueSum 53
+scalar CityNetwork.inter[0] AWT_B_den_total 57
 par CityNetwork.inter[1] typename "\"ned.Intersection\""
 par CityNetwork.inter[1] warmupTime 300s
 attr unit s
@@ -153,30 +153,30 @@ par CityNetwork.inter[1] normalSpeed 9.72mps
 attr unit mps
 par CityNetwork.inter[1] stabilityExtra 5s
 attr unit s
-scalar CityNetwork.inter[1] AIWT_seconds 18.2
-scalar CityNetwork.inter[1] AWT_seconds 1.3333333333333
-scalar CityNetwork.inter[1] AIWT_A_seconds 6.0666666666667
-scalar CityNetwork.inter[1] AWT_A_seconds 1.3333333333333
-scalar CityNetwork.inter[1] AIWT_num_waitingImposedSec 91
-scalar CityNetwork.inter[1] AIWT_den_totalArrivalsCross 5
-scalar CityNetwork.inter[1] AWT_num_waitingRescueRouteSec 4
-scalar CityNetwork.inter[1] AWT_den_servedRescueVeh 3
-scalar CityNetwork.inter[1] AIWT_A_den_initialCrossSum 10
-scalar CityNetwork.inter[1] AIWT_A_den_arrivalsCrossSum 5
-scalar CityNetwork.inter[1] AIWT_A_den_total 15
-scalar CityNetwork.inter[1] AWT_A_den_initialRescueSum 3
-scalar CityNetwork.inter[1] AWT_A_den_arrivalsRescueSum 0
-scalar CityNetwork.inter[1] AWT_A_den_total 3
-scalar CityNetwork.inter[1] AIWT_B_seconds 40.830188679245
-scalar CityNetwork.inter[1] AWT_B_seconds 27.689655172414
-scalar CityNetwork.inter[1] AIWT_B_num_waitingImposedSec 4328
-scalar CityNetwork.inter[1] AWT_B_num_waitingRescueRouteSec 803
-scalar CityNetwork.inter[1] AIWT_B_den_initialCrossSum 10
-scalar CityNetwork.inter[1] AIWT_B_den_arrivalsCrossSum 96
-scalar CityNetwork.inter[1] AIWT_B_den_total 106
-scalar CityNetwork.inter[1] AWT_B_den_initialRescueSum 3
-scalar CityNetwork.inter[1] AWT_B_den_arrivalsRescueSum 26
-scalar CityNetwork.inter[1] AWT_B_den_total 29
+scalar CityNetwork.inter[1] AIWT_seconds 21.571428571429
+scalar CityNetwork.inter[1] AWT_seconds 4.3333333333333
+scalar CityNetwork.inter[1] AIWT_A_seconds 8.3888888888889
+scalar CityNetwork.inter[1] AWT_A_seconds 3.7142857142857
+scalar CityNetwork.inter[1] AIWT_num_waitingImposedSec 151
+scalar CityNetwork.inter[1] AIWT_den_totalArrivalsCross 7
+scalar CityNetwork.inter[1] AWT_num_waitingRescueRouteSec 26
+scalar CityNetwork.inter[1] AWT_den_servedRescueVeh 6
+scalar CityNetwork.inter[1] AIWT_A_den_initialCrossSum 11
+scalar CityNetwork.inter[1] AIWT_A_den_arrivalsCrossSum 7
+scalar CityNetwork.inter[1] AIWT_A_den_total 18
+scalar CityNetwork.inter[1] AWT_A_den_initialRescueSum 6
+scalar CityNetwork.inter[1] AWT_A_den_arrivalsRescueSum 1
+scalar CityNetwork.inter[1] AWT_A_den_total 7
+scalar CityNetwork.inter[1] AIWT_B_seconds 41.009803921569
+scalar CityNetwork.inter[1] AWT_B_seconds 35.934782608696
+scalar CityNetwork.inter[1] AIWT_B_num_waitingImposedSec 4183
+scalar CityNetwork.inter[1] AWT_B_num_waitingRescueRouteSec 1653
+scalar CityNetwork.inter[1] AIWT_B_den_initialCrossSum 11
+scalar CityNetwork.inter[1] AIWT_B_den_arrivalsCrossSum 91
+scalar CityNetwork.inter[1] AIWT_B_den_total 102
+scalar CityNetwork.inter[1] AWT_B_den_initialRescueSum 6
+scalar CityNetwork.inter[1] AWT_B_den_arrivalsRescueSum 40
+scalar CityNetwork.inter[1] AWT_B_den_total 46
 par CityNetwork.inter[2] typename "\"ned.Intersection\""
 par CityNetwork.inter[2] warmupTime 300s
 attr unit s
@@ -287,7 +287,7 @@ par CityNetwork.rsu[3] typename "\"ned.RSU\""
 par CityNetwork.rsu[3] rsuId 3
 par CityNetwork.ev[0] typename "\"ned.EmergencyVehicle\""
 par CityNetwork.ev[0] evId 0
-par CityNetwork.ev[0] severity 1
+par CityNetwork.ev[0] severity 2
 par CityNetwork.ev[0] startPos -300m
 attr unit m
 par CityNetwork.ev[0] destinationPos 300m
@@ -297,21 +297,21 @@ par CityNetwork.ev[0] startTime 300s
 attr unit s
 par CityNetwork.ev[0] speed 16.67mps
 attr unit mps
-scalar CityNetwork.ev[0] EV_finalPos 311.84
+scalar CityNetwork.ev[0] EV_finalPos 307.51
 scalar CityNetwork.ev[0] EV_waitingForGo 0
 par CityNetwork.ev[1] typename "\"ned.EmergencyVehicle\""
 par CityNetwork.ev[1] evId 1
-par CityNetwork.ev[1] severity 3
-par CityNetwork.ev[1] startPos 299m
+par CityNetwork.ev[1] severity 2
+par CityNetwork.ev[1] startPos 200m
 attr unit m
 par CityNetwork.ev[1] destinationPos -300m
 attr unit m
 par CityNetwork.ev[1] approach 1
-par CityNetwork.ev[1] startTime 300s
+par CityNetwork.ev[1] startTime 306s
 attr unit s
 par CityNetwork.ev[1] speed -16.67mps
 attr unit mps
-scalar CityNetwork.ev[1] EV_finalPos -309.23
+scalar CityNetwork.ev[1] EV_finalPos -304.9
 scalar CityNetwork.ev[1] EV_waitingForGo 0
 par CityNetwork typename "\"ned.CityNetwork\""
 par CityNetwork numIntersections 4
