@@ -7,6 +7,8 @@
 #include <map>
 #include <set>
 #include <utility>
+#include <fstream>
+#include <string>
  namespace omnetpp{
 
 // Controller receives:
@@ -18,6 +20,14 @@
 class Controller : public cSimpleModule
 {
   private:
+    std::ofstream transferLog;
+
+    std::string scenarioName;
+    std::string trafficLevel;
+    int seedValue = 0;
+
+    int countInitialPreemptEvents = 0;
+    int countTransferEvents = 0;
     //   parameters (from NED/ini)
     int numIntersections = 4;
     int numApproaches = 4;
@@ -27,7 +37,8 @@ class Controller : public cSimpleModule
     double Dthreshold = 150.0;   // meters (min distance between two traffic lights to see if both should be red or only current)
     simtime_t tClear = 3.0;      // all-red clearance time when switching traffic lights (safety buffer)
     int countLookaheadPreempt = 0;  // future preempt
-
+    int countTransferOverhead = 0;
+int totalOverhead=0;
     // for future lookahead counting
     std::set<std::pair<int,int>> countedLookaheadPairs;
     int countPreempt = 0;//total counted preemption for overhead
@@ -39,6 +50,7 @@ class Controller : public cSimpleModule
         int C = 0;       // queue length
         double TD = 0.0; // traffic density of the specific approach
         simtime_t lastUpdate = -1;//time we last received a report for this approach
+        double phaseRemaining = 0.0;
     };
     std::vector<std::vector<QueueState>> q; // size: numIntersections x numApproaches
     int singleLockedEvId = -1;
@@ -55,7 +67,6 @@ class Controller : public cSimpleModule
         double distToAP = 1e9;  //distance to accident position
         simtime_t eligibleSince = SIMTIME_ZERO;   // first time DEMV <= DD
         bool hasEligibleSince = false;            // to store it only once
-
         //   EAT (seconds) to intersection stop line
         double eat() const {
             if (speed <= 0.0) return 1e9;
@@ -92,10 +103,12 @@ class Controller : public cSimpleModule
     void applySdtlpSingle();
     void applySdtlpMulti();
     double computeDD_dynamic(int targetInter, int approach) const;
-
+    int pickClosestEvId() const;
+    void applySdtlpClosest();
      void sendCmd(int interId, int approach, const char *action, double durationSec);
 
-     void startSession(const EVState& ev);
+    // void startSession(const EVState& ev);
+    void startSession(const EVState& ev, bool fromTransfer = false);
     void switchSessionWithClear(const EVState& ev); // higher priority override: CLEAR then PREEMPT
     void endSessionToNormal();
 

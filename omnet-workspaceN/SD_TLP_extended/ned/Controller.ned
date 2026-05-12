@@ -16,7 +16,9 @@ simple Controller
         double recoveryDuration @unit(s) = default(5s); //time in recovery mode
        // bool useFixedFcfsDD = false;// who has prioirty in FCFS
        //double fixedFcfsDD @unit(m) = 150m;//added
-
+string scenarioName;
+string trafficLevel;
+int seedValue;
         string method;     // "NO_PREEMPT", "FCFS", "SDTLP", "SDTLP_MULTI"
 
         double TDthreshold = 0.7;     //   fixed paper parameter

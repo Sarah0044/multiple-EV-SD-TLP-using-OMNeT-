@@ -807,6 +807,7 @@ using namespace omnetpp;
 #include <cstring>
 #include <string>
 #include <algorithm>
+#include <fstream>
 
 Define_Module(Intersection);
 
@@ -835,7 +836,9 @@ void Intersection::initialize()
     queueMax     = par("queueMax"); //43
 
     warmupTime   = par("warmupTime"); //300s
-
+    normalArrivalTimes.assign(numApproaches, std::deque<simtime_t>());
+    normalWaitTimesA.clear();
+    crossWaitTimesA.clear();
     // Metrics window parameter
     // keep measuring a bit after the EV passes to capture stabilization
     stabilityExtra = par("stabilityExtra").doubleValue(); //5 seconds
@@ -944,6 +947,10 @@ void Intersection::handleMessage(cMessage *msg)
         if (msg == arrivalTimers[a]) {
             queueLen[a]++;
             totalArrivalsAll++;
+            // record arrival time for per-vehicle waiting time tracking
+               if (simTime() >= warmupTime) {
+                   normalArrivalTimes[a].push_back(simTime());
+               }
 
             // Count arrivals by route type during the impact window
             if (simTime() >= warmupTime && metricsActive) {
@@ -990,6 +997,9 @@ void Intersection::handleMessage(cMessage *msg)
             qr->setApproach(a);
             qr->setC(queueLen[a]);
             qr->setTD(clamp01((double)queueLen[a] / (double)queueMax));
+            // NEW: report how much time remains in the current signal phase
+                  double remaining = std::max(0.0, (phaseEnd - simTime()).dbl());
+                  qr->setPhaseRemaining(remaining);
             send(qr, "toController");
         }
         scheduleAt(simTime() + reportPeriod, reportTimer);
@@ -1415,6 +1425,36 @@ void Intersection::handleMessage(cMessage *msg)
             served = std::min(served, queueLen[currentActiveApproach]);
             queueLen[currentActiveApproach] -= served;
 
+
+            // record per-vehicle waiting times for discharged normal vehicles
+            if (simTime() >= warmupTime && metricsActive) {
+                int normalServed = served; // all served here are normal vehicles
+                // if EV is waiting, the last one served might be the EV itself
+                // but EVs are not in normalArrivalTimes so just pop as many as we served
+                for (int s = 0; s < normalServed; s++) {
+                    if (!normalArrivalTimes[currentActiveApproach].empty()) {
+                        simtime_t arrT = normalArrivalTimes[currentActiveApproach].front();
+                        normalArrivalTimes[currentActiveApproach].pop_front();
+                        double waitT = (simTime() - arrT).dbl();
+
+                        // determine if this approach is rescue or cross
+                        bool isRescueApproachNow = false;
+                        if (activeEvCount > 0) {
+                            isRescueApproachNow = (rescueCountPerApproach[currentActiveApproach] > 0);
+                        } else {
+                            isRescueApproachNow = (lastRescueApproach != -1 &&
+                                                   currentActiveApproach == lastRescueApproach);
+                        }
+
+                        if (isRescueApproachNow) {
+                            normalWaitTimesA.push_back(waitT);
+                        } else {
+                            crossWaitTimesA.push_back(waitT);
+                        }
+                    }
+                }
+            }
+
             // If there is at least one EV waiting on this approach, update FRONT EV only
             if (!waitingEVQueue[currentActiveApproach].empty()) {
 
@@ -1563,7 +1603,46 @@ void Intersection::handleMessage(cMessage *msg)
 }
 
 void Intersection::finish()
+
+
 {
+
+
+
+
+    // Write per-vehicle waiting times to CSV file
+    int runNum = getEnvir()->getConfigEx()->getActiveRunNumber();
+
+    std::string trafficLevel;
+    double mean = arrivalMean.dbl();
+    if (mean >= 10.0) trafficLevel = "low";
+    else if (mean >= 5.0) trafficLevel = "medium";
+    else trafficLevel = "high";
+
+    cModule *ctrl = getParentModule()->getSubmodule("controller");
+    std::string methodName = (ctrl != nullptr) ? ctrl->par("method").stdstringValue() : "UNKNOWN";
+
+    std::string filename = "awt_per_vehicle_all.csv";
+    std::ofstream outFile(filename, std::ios::app);
+
+    if (outFile.is_open()) {
+        for (double w : normalWaitTimesA) {
+            outFile << "AWT_A," << intersectionId << ","
+                    << methodName << ","
+                    << trafficLevel << ","
+                    << runNum << ","
+                    << w << "\n";
+        }
+        for (double w : crossWaitTimesA) {
+            outFile << "AIWT_A," << intersectionId << ","
+                    << methodName << ","
+                    << trafficLevel << ","
+                    << runNum << ","
+                    << w << "\n";
+        }
+        outFile.close();
+    }
+
     // ORIGINAL metrics
     if (totalArrivalsCross > 0)
         recordScalar("AIWT_seconds", waitingImposedSec / (double)totalArrivalsCross);
@@ -1630,6 +1709,8 @@ void Intersection::finish()
     recordScalar("AWT_B_den_initialRescueSum", awtB_initialRescueSum);
     recordScalar("AWT_B_den_arrivalsRescueSum", awtB_arrivalsRescueSum);
     recordScalar("AWT_B_den_total", awtDenB);
+
+
 
     // Cleanup
     for (auto *t : arrivalTimers) cancelAndDelete(t);

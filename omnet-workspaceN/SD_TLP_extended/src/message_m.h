@@ -155,6 +155,7 @@ inline void doParsimUnpacking(omnetpp::cCommBuffer *b, TlCommand& obj) {obj.pars
  *     int approach;//Which approach (N/E/S/W) this report refers to
  *     int C;//the number of vehicles in front of the emergency vehicle at the intersection (queue length for an approach)
  *     double TD;//Traffic Density value to compare with the threshold
+ *     double phaseRemaining;
  * }
  * </pre>
  */
@@ -165,6 +166,7 @@ class QueueReport : public ::omnetpp::cMessage
     int approach = 0;
     int C = 0;
     double TD = 0;
+    double phaseRemaining = 0;
 
   private:
     void copy(const QueueReport& other);
@@ -192,13 +194,16 @@ class QueueReport : public ::omnetpp::cMessage
 
     virtual double getTD() const;
     virtual void setTD(double TD);
+
+    virtual double getPhaseRemaining() const;
+    virtual void setPhaseRemaining(double phaseRemaining);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const QueueReport& obj) {obj.parsimPack(b);}
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, QueueReport& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>message.msg:27</tt> by opp_msgtool.
+ * Class generated from <tt>message.msg:28</tt> by opp_msgtool.
  * <pre>
  * message SignalState //from intersection to ev that send the traffic signal state every second to ev.
  * {
@@ -244,7 +249,7 @@ inline void doParsimPacking(omnetpp::cCommBuffer *b, const SignalState& obj) {ob
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, SignalState& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>message.msg:32</tt> by opp_msgtool.
+ * Class generated from <tt>message.msg:33</tt> by opp_msgtool.
  * <pre>
  * packet EvAtStopLine
  * {
@@ -295,7 +300,7 @@ inline void doParsimPacking(omnetpp::cCommBuffer *b, const EvAtStopLine& obj) {o
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, EvAtStopLine& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>message.msg:39</tt> by opp_msgtool.
+ * Class generated from <tt>message.msg:40</tt> by opp_msgtool.
  * <pre>
  * packet EvGo
  * {
@@ -340,7 +345,7 @@ inline void doParsimPacking(omnetpp::cCommBuffer *b, const EvGo& obj) {obj.parsi
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, EvGo& obj) {obj.parsimUnpack(b);}
 
 /**
- * Class generated from <tt>message.msg:48</tt> by opp_msgtool.
+ * Class generated from <tt>message.msg:49</tt> by opp_msgtool.
  * <pre>
  * //}
  * packet EvQueueAhead

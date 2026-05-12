@@ -22,6 +22,7 @@ message QueueReport {
     int approach;//Which approach (N/E/S/W) this report refers to
     int C;//the number of vehicles in front of the emergency vehicle at the intersection (queue length for an approach)
     double TD;//Traffic Density value to compare with the threshold
+    double phaseRemaining;
 }
 message SignalState //from intersection to ev that send the traffic signal state every second to ev.
 {

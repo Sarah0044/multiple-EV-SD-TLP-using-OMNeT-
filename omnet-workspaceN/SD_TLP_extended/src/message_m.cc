@@ -1103,6 +1103,7 @@ void QueueReport::copy(const QueueReport& other)
     this->approach = other.approach;
     this->C = other.C;
     this->TD = other.TD;
+    this->phaseRemaining = other.phaseRemaining;
 }
 
 void QueueReport::parsimPack(omnetpp::cCommBuffer *b) const
@@ -1112,6 +1113,7 @@ void QueueReport::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->approach);
     doParsimPacking(b,this->C);
     doParsimPacking(b,this->TD);
+    doParsimPacking(b,this->phaseRemaining);
 }
 
 void QueueReport::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -1121,6 +1123,7 @@ void QueueReport::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->approach);
     doParsimUnpacking(b,this->C);
     doParsimUnpacking(b,this->TD);
+    doParsimUnpacking(b,this->phaseRemaining);
 }
 
 int QueueReport::getIntersectionId() const
@@ -1163,6 +1166,16 @@ void QueueReport::setTD(double TD)
     this->TD = TD;
 }
 
+double QueueReport::getPhaseRemaining() const
+{
+    return this->phaseRemaining;
+}
+
+void QueueReport::setPhaseRemaining(double phaseRemaining)
+{
+    this->phaseRemaining = phaseRemaining;
+}
+
 class QueueReportDescriptor : public omnetpp::cClassDescriptor
 {
   private:
@@ -1172,6 +1185,7 @@ class QueueReportDescriptor : public omnetpp::cClassDescriptor
         FIELD_approach,
         FIELD_C,
         FIELD_TD,
+        FIELD_phaseRemaining,
     };
   public:
     QueueReportDescriptor();
@@ -1238,7 +1252,7 @@ const char *QueueReportDescriptor::getProperty(const char *propertyName) const
 int QueueReportDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *base = getBaseClassDescriptor();
-    return base ? 4+base->getFieldCount() : 4;
+    return base ? 5+base->getFieldCount() : 5;
 }
 
 unsigned int QueueReportDescriptor::getFieldTypeFlags(int field) const
@@ -1254,8 +1268,9 @@ unsigned int QueueReportDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,    // FIELD_approach
         FD_ISEDITABLE,    // FIELD_C
         FD_ISEDITABLE,    // FIELD_TD
+        FD_ISEDITABLE,    // FIELD_phaseRemaining
     };
-    return (field >= 0 && field < 4) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *QueueReportDescriptor::getFieldName(int field) const
@@ -1271,8 +1286,9 @@ const char *QueueReportDescriptor::getFieldName(int field) const
         "approach",
         "C",
         "TD",
+        "phaseRemaining",
     };
-    return (field >= 0 && field < 4) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 5) ? fieldNames[field] : nullptr;
 }
 
 int QueueReportDescriptor::findField(const char *fieldName) const
@@ -1283,6 +1299,7 @@ int QueueReportDescriptor::findField(const char *fieldName) const
     if (strcmp(fieldName, "approach") == 0) return baseIndex + 1;
     if (strcmp(fieldName, "C") == 0) return baseIndex + 2;
     if (strcmp(fieldName, "TD") == 0) return baseIndex + 3;
+    if (strcmp(fieldName, "phaseRemaining") == 0) return baseIndex + 4;
     return base ? base->findField(fieldName) : -1;
 }
 
@@ -1299,8 +1316,9 @@ const char *QueueReportDescriptor::getFieldTypeString(int field) const
         "int",    // FIELD_approach
         "int",    // FIELD_C
         "double",    // FIELD_TD
+        "double",    // FIELD_phaseRemaining
     };
-    return (field >= 0 && field < 4) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 5) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **QueueReportDescriptor::getFieldPropertyNames(int field) const
@@ -1387,6 +1405,7 @@ std::string QueueReportDescriptor::getFieldValueAsString(omnetpp::any_ptr object
         case FIELD_approach: return long2string(pp->getApproach());
         case FIELD_C: return long2string(pp->getC());
         case FIELD_TD: return double2string(pp->getTD());
+        case FIELD_phaseRemaining: return double2string(pp->getPhaseRemaining());
         default: return "";
     }
 }
@@ -1407,6 +1426,7 @@ void QueueReportDescriptor::setFieldValueAsString(omnetpp::any_ptr object, int f
         case FIELD_approach: pp->setApproach(string2long(value)); break;
         case FIELD_C: pp->setC(string2long(value)); break;
         case FIELD_TD: pp->setTD(string2double(value)); break;
+        case FIELD_phaseRemaining: pp->setPhaseRemaining(string2double(value)); break;
         default: throw omnetpp::cRuntimeError("Cannot set field %d of class 'QueueReport'", field);
     }
 }
@@ -1425,6 +1445,7 @@ omnetpp::cValue QueueReportDescriptor::getFieldValue(omnetpp::any_ptr object, in
         case FIELD_approach: return pp->getApproach();
         case FIELD_C: return pp->getC();
         case FIELD_TD: return pp->getTD();
+        case FIELD_phaseRemaining: return pp->getPhaseRemaining();
         default: throw omnetpp::cRuntimeError("Cannot return field %d of class 'QueueReport' as cValue -- field index out of range?", field);
     }
 }
@@ -1445,6 +1466,7 @@ void QueueReportDescriptor::setFieldValue(omnetpp::any_ptr object, int field, in
         case FIELD_approach: pp->setApproach(omnetpp::checked_int_cast<int>(value.intValue())); break;
         case FIELD_C: pp->setC(omnetpp::checked_int_cast<int>(value.intValue())); break;
         case FIELD_TD: pp->setTD(value.doubleValue()); break;
+        case FIELD_phaseRemaining: pp->setPhaseRemaining(value.doubleValue()); break;
         default: throw omnetpp::cRuntimeError("Cannot set field %d of class 'QueueReport'", field);
     }
 }

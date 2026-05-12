@@ -22,6 +22,10 @@ struct WaitingEVInfo {
 };
 
 std::vector<std::deque<WaitingEVInfo>> waitingEVQueue;
+// Per-vehicle waiting time tracking
+std::vector<std::deque<simtime_t>> normalArrivalTimes; // per approach
+std::vector<double> normalWaitTimesA;  // collected AWT_A per-vehicle times
+std::vector<double> crossWaitTimesA;   // collected AIWT_A per-vehicle times
 
     // For multiple EVs possibly on different approaches:
     std::vector<int> rescueCountPerApproach;  // rescueCountPerApproach[a] > 0 means approach a is part of rescue route now
