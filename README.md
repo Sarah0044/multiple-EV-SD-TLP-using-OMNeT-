@@ -1,4 +1,4 @@
-# Multi-Emergency Vehicle Software-Defined Traffic Light Preemption (SD-TLP) using OMNeT++
+# Centralized Priority Resolution with Dynamic Preemption Transfer for Concurrent Emergency Vehicles in Software-Defined Traffic Networks
 
 ## Overview
 This project extends the Software-Defined Traffic Light Preemption (SD-TLP) mechanism designed by Bagheri et al. to support **multiple emergency vehicles (EVs)**. The system is implemented using **OMNeT++ (without SUMO/Veins)** and simulates traffic using queue-based modeling.
