@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<analysis version="2">
-    <inputs>
-        <input pattern="results/Scenario4_ThreeEV-42-*.vec"/>
-        <input pattern="results/Scenario4_ThreeEV-42-*.sca"/>
-    </inputs>
-    <charts/>
-</analysis>
